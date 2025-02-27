@@ -21,7 +21,7 @@ os.makedirs(LONG_MEDIA_FOLDER, exist_ok=True)
 os.makedirs(TRASH_FOLDER, exist_ok=True)
 
 # Time to delete files (N minutes)
-DELETE_TIME = 1 * 60  # N minutes
+DELETE_TIME = 1 * 60  # 1 minute
 
 # Function to clean up old files
 def cleanup_old_files():
@@ -70,19 +70,21 @@ def process_tts(request, storage_folder):
     text = data.get('text')
     voice = data.get('voice')
     enable_flow = data.get('enableFlow') == 'true'
+    input_lang = data.get('input_lang', 'vi')  # Ngôn ngữ đầu vào mặc định là tiếng Việt
+    output_lang = data.get('output_lang', 'vi')  # Ngôn ngữ đầu ra mặc định là tiếng Việt
 
     if not text or not voice:
         return jsonify({"error": "Missing text or voice parameter"}), 400
 
-    # Process the text using the appropriate TTS function
+    # Xử lý văn bản bằng hàm TTS phù hợp
     if enable_flow:
-        filename, file_path = process_text_with_flow(text, voice, storage_folder)
+        filename, file_path, translated_text = process_text_with_flow(text, voice, storage_folder, input_lang, output_lang)
     else:
-        filename, file_path = process_text_without_flow(text, voice, storage_folder)
+        filename, file_path, translated_text = process_text_without_flow(text, voice, storage_folder, input_lang, output_lang)
 
-    # Return the URL of the final audio file
+    # Trả về URL của tệp âm thanh và văn bản đã dịch
     audio_url = f"/media/{os.path.basename(storage_folder)}/{filename}"
-    return jsonify({"audioUrl": audio_url})
+    return jsonify({"audioUrl": audio_url, "translatedText": translated_text})
 
 # API to delete a file
 @app.route('/api/delete', methods=['DELETE'])
