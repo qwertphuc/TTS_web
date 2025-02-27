@@ -1,0 +1,15 @@
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - media-volume:/app/media
+    environment:
+      FLASK_ENV: development
+
+volumes:
+  media-volume:
+  

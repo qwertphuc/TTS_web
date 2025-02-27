@@ -1,0 +1,109 @@
+/* General styles */
+body.bg-dark-gray {
+    background-color: #2c3e50 !important; /* Dark gray-blue background for body */
+    color: #fff; /* White text for readability */
+    font-family: 'Arial', sans-serif;
+}
+
+/* Card and container styles */
+.card.bg-dark-gray {
+    background-color: #34495e !important; /* Lighter gray-blue for cards */
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Text and label styles */
+.text-white {
+    color: #fff !important;
+}
+
+.form-label.fw-bold {
+    color: #ecf0f1 !important; /* Light gray for labels */
+}
+
+/* Input and select styles */
+.form-control.bg-light-gray,
+.form-select.bg-light-gray {
+    background-color: #465c71 !important; /* Pale gray-blue for inputs and selects */
+    border: 1px solid #5d6d7e !important;
+    color: #fff !important;
+    box-shadow: none;
+}
+
+.form-control.bg-light-gray:focus,
+.form-select.bg-light-gray:focus {
+    background-color: #465c71 !important;
+    border-color: #3498db !important; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5) !important;
+    color: #fff !important;
+}
+
+/* Button styles */
+.btn-blue {
+    background-color: #3498db !important; /* Bright blue for Short Storage */
+    border: none !important;
+    color: #fff !important;
+}
+
+.btn-blue:hover {
+    background-color: #2980b9 !important; /* Darker blue on hover */
+}
+
+.btn-green {
+    background-color: #2ecc71 !important; /* Green for Long Storage */
+    border: none !important;
+    color: #fff !important;
+}
+
+.btn-green:hover {
+    background-color: #27ae60 !important; /* Darker green on hover */
+}
+
+.btn-light-gray {
+    background-color: #7f8c8d !important; /* Light gray for toggle button */
+    border: none !important;
+    color: #fff !important;
+}
+
+.btn-light-gray:hover {
+    background-color: #6c757d !important; /* Darker gray on hover */
+}
+
+/* Audio player styles */
+audio {
+    background-color: #465c71 !important; /* Pale gray-blue for audio player */
+    border-radius: 5px;
+}
+
+/* Spinner styles */
+.spinner-border.text-blue {
+    border-color: #3498db !important;
+    border-right-color: transparent !important;
+}
+
+/* Container overlay for readability */
+.container {
+    background-color: rgba(52, 73, 94, 0.9) !important; /* Semi-transparent gray-blue */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* Width adjustment for dropdowns */
+.w-45 {
+    width: 45% !important;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+    .w-45 {
+        width: 100% !important;
+        margin-bottom: 10px !important;
+    }
+    .d-flex.align-items-center.justify-content-between {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .mx-2 {
+        display: none !important; /* Hide "to" on mobile */
+    }
+}

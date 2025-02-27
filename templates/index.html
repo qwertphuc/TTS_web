@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Storage</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}
+    ">
+</head>
+<body class="bg-dark-gray">
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4 bg-dark-gray rounded">
+            <h2 class="text-center text-white">Audio TTS Storage</h2>
+            <form id="myForm">
+                <div class="mb-3">  
+                    <label for="textInput" class="form-label fw-bold text-white">Nhập văn bản:</label>
+                    <textarea id="textInput" name="text" class="form-control bg-light-gray text-white" rows="3" placeholder="Nhập văn bản tại đây..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="language-select" class="form-label fw-bold text-white">Xử lý ngôn ngữ:</label>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <select name="input_lang" id="input-lang-select" class="form-select bg-light-gray text-white w-45">
+                            <option value="vi">Tiếng Việt</option>
+                            <option value="en">Tiếng Anh</option>
+                        </select>
+                        <span class="mx-2 text-white">to</span>
+                        <select name="output_lang" id="output-lang-select" class="form-select bg-light-gray text-white w-45">
+                            <option value="vi">Tiếng Việt</option>
+                            <option value="en">Tiếng Anh</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="voice-select" class="form-label fw-bold text-white">Chọn giọng nói:</label>
+                    <select name="voice" id="voice-select" class="form-select bg-light-gray text-white">
+                        <!-- Danh sách giọng nói sẽ được cập nhật bằng JavaScript -->
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" name="storageType" value="short" class="btn btn-blue" id="shortStorageBtn">Short Storage</button>
+                    <button type="submit" name="storageType" value="long" class="btn btn-green" id="longStorageBtn">Long Storage</button>
+                    <button type="button" id="toggleFlowBtn" class="btn btn-light-gray">enable flow: OFF</button>
+                </div>
+            </form>
+
+            <!-- Phần hiển thị văn bản đã dịch -->
+            <div id="translatedTextContainer" class="mt-3" style="display: none;">
+                <h5 class="text-center text-white">Văn bản đã dịch:</h5>
+                <p id="translatedText" class="text-center text-white"></p>
+            </div>
+
+            <!-- Spinner loading -->
+            <div id="loadingSpinner" class="text-center mt-3" style="display: none;">
+                <div class="spinner-border text-blue" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-white">Đang xử lý...</p>
+            </div>
+
+            <div id="audioContainer" class="mt-4 text-center" style="display: none;">
+                <audio id="audioPlayer" controls class="w-100"></audio>
+            </div>
+
+            <div id="downloadContainer" class="mt-3 text-center" style="display: none;">
+                <a id="downloadLink" class="btn btn-light-gray">Download Audio</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const myForm = document.getElementById('myForm');
+        const audioContainer = document.getElementById('audioContainer');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const shortStorageBtn = document.getElementById('shortStorageBtn');
+        const longStorageBtn = document.getElementById('longStorageBtn');
+        const toggleFlowBtn = document.getElementById('toggleFlowBtn');
+        const downloadContainer = document.getElementById('downloadContainer');
+        const downloadLink = document.getElementById('downloadLink');
+        const outputLangSelect = document.getElementById('output-lang-select');
+        const voiceSelect = document.getElementById('voice-select');
+        const translatedTextContainer = document.getElementById('translatedTextContainer');
+        const translatedText = document.getElementById('translatedText');
+
+        let enableFlow = false;
+
+        // Danh sách giọng nói
+        const voices = {
+            'vi': [
+                { value: 'vi-VN-HoaiMyNeural', text: 'Hoài My (Nữ)' },
+                { value: 'vi-VN-NamMinhNeural', text: 'Nam Minh (Nam)' }
+            ],
+            'en': [
+                { value: 'en-US-JennyNeural', text: 'Jenny (Nữ, Mỹ)' },
+                { value: 'en-GB-RyanNeural', text: 'Ryan (Nam, Anh)' }
+            ]
+        };
+
+        // Cập nhật danh sách giọng nói dựa trên ngôn ngữ đầu ra
+        function updateVoices() {
+            const selectedLang = outputLangSelect.value;
+            voiceSelect.innerHTML = '';
+            voices[selectedLang].forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.value;
+                option.textContent = voice.text;
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        outputLangSelect.addEventListener('change', updateVoices);
+        document.addEventListener('DOMContentLoaded', updateVoices);
+
+        // Toggle enable flow
+        toggleFlowBtn.addEventListener('click', () => {
+            enableFlow = !enableFlow;
+            toggleFlowBtn.textContent = `enable flow: ${enableFlow ? 'ON' : 'OFF'}`;
+        });
+
+        myForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            loadingSpinner.style.display = 'block';
+            audioContainer.style.display = 'none';
+            downloadContainer.style.display = 'none';
+            translatedTextContainer.style.display = 'none';
+
+            shortStorageBtn.disabled = true;
+            longStorageBtn.disabled = true;
+            toggleFlowBtn.disabled = true;
+
+            const formData = new FormData(this);
+            const storageType = e.submitter.value;
+            const apiEndpoint = storageType === 'long' ? '/api/long' : '/api/short';
+
+            formData.append('enableFlow', enableFlow);
+
+            fetch(apiEndpoint, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.audioUrl) {
+                    audioPlayer.src = data.audioUrl;
+                    audioContainer.style.display = 'block';
+                    audioPlayer.load();
+                    audioPlayer.play();
+
+                    downloadLink.href = data.audioUrl;
+                    downloadLink.download = `audio_${storageType}.mp3`;
+                    downloadContainer.style.display = 'block';
+
+                    // Giả định server trả về văn bản đã dịch
+                    const translated = data.translatedText || "Văn bản đã dịch sẽ hiển thị ở đây";
+                    translatedText.textContent = translated;
+                    translatedTextContainer.style.display = 'block';
+                } else {
+                    alert("Không nhận được URL âm thanh từ server.");
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi:', error);
+                alert("Có lỗi xảy ra khi xử lý.");
+            })
+            .finally(() => {
+                loadingSpinner.style.display = 'none';
+                shortStorageBtn.disabled = false;
+                longStorageBtn.disabled = false;
+                toggleFlowBtn.disabled = false;
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

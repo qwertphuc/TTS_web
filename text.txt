@@ -1,0 +1,3 @@
+curl -X POST http://localhost:5000/api/short  -H "X-API-Key: exx9I2lc_26DGZTFc_lAp7ox5IBF-0W2lcfkLGl3p3Y"  -H "Content-Type: application/x-www-form-urlencoded"  -d "text=Hello, this is a test."  -d "voice=vi-VN-HoaiMyNeural"  -d "enableFlow=true"
+
+curl -o output.mp3 http://localhost:5000/media/short/audio_1740562201.mp3
